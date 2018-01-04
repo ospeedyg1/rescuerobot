@@ -1,13 +1,20 @@
-// HC-SR04 ultrasound sensor with 180 micro servo 
-// Modified By: Jeovanny Reyes
-// Modified to work on ROS
-// Raytheon Radar Guided Rescue Robot
-
-// Input: None
-// Output: None
-
-// Publisher: pub_range publishes to "HerculesUltrasound" topic
-// Subscriber: None
+/*
+* HC-SR04 ultrasound sensor with 180 micro servo 
+* Modified By: Jeovanny Reyes
+* Modified to work on ROS
+* Raytheon Radar Guided Rescue Robot
+* Cal State LA
+*
+* Input: None
+* Output: None
+*
+* Publisher: pub_range publishes to "HerculesUltrasound" topic
+* Subscriber: None
+*
+* How to Run from Terminal: Run "roscore" 
+*                           On a sperate terminal run "rosrun rosserial_python serial_node.py _port:=/dev/ttyACM0 _baud:=9600
+*                           Note: _port may be different for other and baud rate parameter can be changed
+*/
 
 #include <ros.h>
 #include <ros/time.h>
