@@ -12,7 +12,7 @@
 * Subscriber: None
 *
 * How to Run from Terminal: Run "roscore" 
-*                           On a sperate terminal run "rosrun rosserial_python serial_node.py _port:=/dev/ttyACM0 _baud:=9600
+*                           On a sperate terminal run "rosrun rosserial_python serial_node.py _port:=/dev/ttyACM0 _baud:=57600
 *                           Note: _port may be different for other and baud rate parameter can be changed
 */
 
@@ -60,22 +60,22 @@ void loop() {
   for(int i=15;i<=165;i++){   
   myServo.write(i);
   delay(30);
-  
-  range_msg.range = calculateDistance();
-  range_msg.header.stamp = nh.now();
-  pub_range.publish( &range_msg);
+  //{
+  //range_msg.range = calculateDistance();
+  //range_msg.header.stamp = nh.now();
+  //pub_range.publish( &range_msg);
   
   }
   // Repeats the previous lines from 165 to 15 degrees
   for(int i=165;i>15;i--){  
   myServo.write(i);
   delay(30);
-
+  }
   range_msg.range = calculateDistance();
   range_msg.header.stamp = nh.now();
   pub_range.publish( &range_msg);
   
-  }
+  //}
 
   nh.spinOnce();
 }
