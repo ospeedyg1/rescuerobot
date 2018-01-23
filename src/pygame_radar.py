@@ -6,14 +6,13 @@
 # https://www.youtube.com/redirect?q=http%3A%2F%2Farkouji.cocolog-nifty.com%2Fblog%2F2016%2F02%2Fraspberry-pi360.html&event=video_description&v=Hqkki-Jl4Y0&redir_token=Mpq6_On6NVQa4GJB1g0-_uQ2zn98MTUxNTYzNDM4MUAxNTE1NTQ3OTgx
 
 # Modified By: Jeovanny Reyes
-# Modified On: January 18, 2018
+# Modified On: January 22, 2018
 
 # Raytheon Radar Guided Rescue Robot
 # Cal State LA Senior Design
 
 import math
 from sys import exit
-#import signal
 import time
 #import subprocess
 import pygame
@@ -23,23 +22,22 @@ import rospy
 from sensor_msgs.msg import Range #as Float32 # Importing from ultrasound information
 #import sensor_msgs.msg
 
-def callback(range): # Takes in message "range" as input
-    #rospy.loginfo(rospy.get_caller_id() + "I heard %f", range.range)
-    dist = range
-    #dist = 4
-    return dist
+class radar_display():
+    def __init__(self):
+        self.x = 1
+        #rospy.init_node("radar_display", anonymous=True)
+        self.rada_dispa = rospy.Subscriber("HerculesUltrasound",Range, self.callback) #Used to be Float32. [Float 32, callback]
 
-# def ini_lis():
-#     rospy.init_node("radar_display", anonymous=True)
-#     rospy.Subscriber("HerculesUltrasound", Float32, callback)
-
-def rang_dist():
-    new_dist = callback(range)
-    return new_dist
+    def callback(self,range): # Takes in message "range" as input
+        rospy.loginfo(rospy.get_caller_id() + "I heard %f", range.range)
+        #self.dist = range.range
+        self.dist = 3
+        return self.dist
 
 def main():
+
     rospy.init_node("radar_display", anonymous=True)
-    rospy.Subscriber("HerculesUltrasound",Range, callback) #Used to be Float32. [Float 32, callback]
+    #rospy.Subscriber("HerculesUltrasound",Range, callback) #Used to be Float32. [Float 32, callback]
     pygame.init() # Initializing pygame
 
     # Adjusting window
@@ -110,9 +108,8 @@ def main():
            text_col.render('|_| Circle Increment of 20 cm',True,(0, 200, 0))
            #distance = 2# Create for loop or while loop to continously get values from US.
            #dist = 3
-           #dist = rang_dist()
-           #dist = int(dist)
-           dist = callback(range)
+           dist = radar_display()
+
 
     # Radar Point
 
@@ -162,7 +159,6 @@ def main():
                if event.type == pygame.QUIT:
                    pygame.quit()
                    exit()
-
 
     rospy.spin()
 
