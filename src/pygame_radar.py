@@ -22,22 +22,26 @@ import rospy
 from sensor_msgs.msg import Range #as Float32 # Importing from ultrasound information
 #import sensor_msgs.msg
 
-class radar_display():
-    def __init__(self):
-        self.x = 1
-        #rospy.init_node("radar_display", anonymous=True)
-        self.rada_dispa = rospy.Subscriber("HerculesUltrasound",Range, self.callback) #Used to be Float32. [Float 32, callback]
+# class RadarDisplay(object):
+#     def __init__(self): rg
+#         #self.x = 1
+#         #rospy.init_node("radar_display", anonymous=True)
+#         self.rada_dispa = rospy.Subscriber("HerculesUltrasound",Range, self.callback) #Used to be Float32. [Float 32, callback]
+#
+def callback(range): # Takes in message "range" as input
+    #rospy.loginfo(rospy.get_caller_id() + "I heard %f", range.range)
+    #self.dist = range.range
+    dist = 3.05
+    return dist
 
-    def callback(self,range): # Takes in message "range" as input
-        rospy.loginfo(rospy.get_caller_id() + "I heard %f", range.range)
-        #self.dist = range.range
-        self.dist = 3
-        return self.dist
+# def dista(call):
+#     dist = callback(range)
+#     return dist
 
 def main():
 
     rospy.init_node("radar_display", anonymous=True)
-    #rospy.Subscriber("HerculesUltrasound",Range, callback) #Used to be Float32. [Float 32, callback]
+    rospy.Subscriber("HerculesUltrasound",Range, callback) #Used to be Float32. [Float 32, callback]
     pygame.init() # Initializing pygame
 
     # Adjusting window
@@ -71,7 +75,7 @@ def main():
       for i in range(2048): # 4096 covers entire circle and is how many times radius line is drawn
     # motor angle (From Arduino)
         #angle = i * 5.625/64 #Part of original code. It increments by 5 degrees (0.087890625)
-        angle = i * 6.283/72 #  Line is incremented by 5 degrees
+        angle = i * 6.283/72 #  Line is incremented by 5 degrees (6.283 is 2 pi)
           #angle = 15 # My code
         #
         # for pin in range(0, 4):
@@ -87,6 +91,10 @@ def main():
         #         StepCounter = 0
         # if (StepCounter<0):
         #         StepCounter = StepCount+StepDir
+        dist = 3
+        #radar_display = RadarDisplay()
+        #dist = radar_display(i)
+        #print(dist)
 
         if i%8==0: # Drawing radar arcs and axis. sx and sy originally divided by 2. 8 is the 8 figures drawn
             # Color green: (0,255,0). Color blue: (0,0,255)
@@ -108,8 +116,6 @@ def main():
            text_col.render('|_| Circle Increment of 20 cm',True,(0, 200, 0))
            #distance = 2# Create for loop or while loop to continously get values from US.
            #dist = 3
-           dist = radar_display()
-
 
     # Radar Point
 
@@ -153,8 +159,8 @@ def main():
                    exit()
 
         else:
-           time.sleep(0.001) # Suspending current thread so that
-
+           #time.sleep(0.001) # Suspending current thread so that
+           rate = rospy.Rate(10) # Using instead of time.sleep
            for event in pygame.event.get(): # Closes the gui when we press x red button
                if event.type == pygame.QUIT:
                    pygame.quit()
