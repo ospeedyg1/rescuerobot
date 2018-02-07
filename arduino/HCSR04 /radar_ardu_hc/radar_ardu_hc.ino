@@ -33,9 +33,9 @@
 ros::NodeHandle nh;
 
 sensor_msgs::Range range_msg; // This creates the message type "Range"
-std_msgs::Float32 str_msg; // This creates the message type "Float 32"
+//std_msgs::Float32 str_msg; // This creates the message type "Float 32"
 ros::Publisher pub_range( "/HerculesUltrasound_Range", &range_msg);
-ros::Publisher servopos("/HerculesUltrasound_Position", &str_msg); 
+//ros::Publisher servopos("/HerculesUltrasound_Position", &str_msg); 
  
 // Defines Trig and Echo pins of the Ultrasonic Sensor
 const int trigPin = 10; //digital pin
@@ -53,7 +53,7 @@ void setup() {
 
   nh.initNode();
   nh.advertise(pub_range);
-  nh.advertise(servopos);
+  //nh.advertise(servopos);
 
   range_msg.radiation_type = sensor_msgs::Range::ULTRASOUND;
   range_msg.header.frame_id = "/USH";
@@ -79,8 +79,8 @@ void loop() {
   range_msg.header.stamp = nh.now();
   pub_range.publish( &range_msg);
   
-  str_msg.data = servo_pos; // Servo position publishing
-  servopos.publish( &str_msg);
+ // str_msg.data = servo_pos; // Servo position publishing
+  //servopos.publish( &str_msg);
   
   delay(30);
   }
@@ -96,8 +96,8 @@ void loop() {
   range_msg.header.stamp = nh.now();
   pub_range.publish( &range_msg);
   
-  str_msg.data = servo_pos; // Servo position publishing
-  servopos.publish( &str_msg);
+  //str_msg.data = servo_pos; // Servo position publishing
+  //servopos.publish( &str_msg);
   
   delay(30);
   }
@@ -120,5 +120,5 @@ float calculateDistance(){
   
   duration = pulseIn(echoPin, HIGH); // Reads the echoPin, returns the sound wave travel time in microseconds
   distance= duration*0.034/2;
-  return distance / 100; // in meters
+  return distance / 100; // in meters. Try 1000 next time
 }
