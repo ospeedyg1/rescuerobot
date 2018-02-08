@@ -8,6 +8,9 @@
 # Modified By: Jeovanny Reyes
 # Modified On: February 6, 2018
 
+# Subscriber: "HerculesUltrasound_Range" message topic of float 32 data type
+# Pubslisher: "" Hercules motor control to stop robot from moving
+
 # Raytheon Radar Guided Rescue Robot
 # Cal State LA Senior Design
 
@@ -26,14 +29,19 @@ class RadarDisplay():
         self.nodename = rospy.get_name()
         rospy.loginfo("%s started" % self.nodename)
 
-        # Initializing object distance
+        # Initializing and instantiating values
         self.dist = 0
         self.angle = 0
+        self.pos = 2
+        self.green = (0,200,0) # color
+        self.red = (200,0,0) # color
+        self.black = (0,0,0) # color
+        self.brightred = (255,0,0)
+        self.brightgreen = (0,255,0)
+        self.smalltext = 0
 
         # Subscriber
         self.radsip = rospy.Subscriber("HerculesUltrasound_Range",Range, self.distcallback) #Used to be Float32. [Float 32, callback]
-
-        # Main function that plots to radar
         self.plot()
 
         rospy.spin()
@@ -41,6 +49,84 @@ class RadarDisplay():
     def distcallback(self,range): # Takes in message "range" as input
         obj_dist = range.range
         self.dist = obj_dist
+
+    def text_object_black(self,text, font):
+        self.textSurface = font.render(text, True, self.black)
+        return self.textSurface, self.textSurface.get_rect()
+
+    def text_object_green(self,text, font):
+        self.textSurface = font.render(text, True, self.green)
+        return self.textSurface, self.textSurface.get_rect()
+
+    def arc_inc(self):
+        x_pos = 328
+        y_pos = 460
+        x_length = 150
+        y_width = 100
+        self.smalltext = pygame.font.Font("freesansbold.ttf",15)
+
+        textSurf1, textRect1 = self.text_object_green("25 cm", self.smalltext)
+        textRect1.center = ( (x_pos +(x_length/2)), y_pos+(y_width/2))
+        pygame.display.get_surface().blit(textSurf1, textRect1)
+
+        textSurf2, textRect2 = self.text_object_green("50 cm", self.smalltext)
+        textRect2.center = ( (x_pos +(x_length/2) - 100), y_pos+(y_width/2))
+        pygame.display.get_surface().blit(textSurf2, textRect2)
+
+        textSurf3, textRect3 = self.text_object_green("75 cm", self.smalltext)
+        textRect3.center = ( (x_pos +(x_length/2) - 200), y_pos+(y_width/2))
+        pygame.display.get_surface().blit(textSurf3, textRect3)
+
+        textSurf4, textRect4 = self.text_object_green("100 cm", self.smalltext)
+        textRect4.center = ( (x_pos +(x_length/2) - 300), y_pos+(y_width/2))
+        pygame.display.get_surface().blit(textSurf4, textRect4)
+
+        textSurf5, textRect5 = self.text_object_green("25 cm", self.smalltext)
+        textRect5.center = ( (x_pos +(x_length/2) + 200), y_pos+(y_width/2))
+        pygame.display.get_surface().blit(textSurf5, textRect5)
+
+        textSurf6, textRect6 = self.text_object_green("50 cm", self.smalltext)
+        textRect6.center = ( (x_pos +(x_length/2) + 300), y_pos+(y_width/2))
+        pygame.display.get_surface().blit(textSurf6, textRect6)
+
+        textSurf7, textRect7 = self.text_object_green("75 cm", self.smalltext)
+        textRect7.center = ( (x_pos +(x_length/2) + 400), y_pos+(y_width/2))
+        pygame.display.get_surface().blit(textSurf7, textRect7)
+
+        textSurf8, textRect8 = self.text_object_green("100 cm", self.smalltext)
+        textRect8.center = ( (x_pos +(x_length/2) + 500), y_pos+(y_width/2))
+        pygame.display.get_surface().blit(textSurf8, textRect8)
+
+    def detect_text(self):
+        x_pos = 625
+        y_pos = 5
+        x_length = 150
+        y_width = 100
+        self.smalltext = pygame.font.Font("freesansbold.ttf",30)
+        textSurfstop, textRectstop = self.text_object_green("Object Distance:", self.smalltext)
+        textRectstop.center = ( (x_pos +(x_length/2)), y_pos+(y_width/2))
+        pygame.display.get_surface().blit(textSurfstop, textRectstop)
+
+    def stop_button(self): # Function to stop robot from moving
+        mouse = pygame.mouse.get_pos() # Movement of mouse.
+        click = pygame.mouse.get_pressed() # For button clicked
+        self.smalltext = pygame.font.Font("freesansbold.ttf",30)
+        x_pos = 50
+        y_pos = 35
+        x_length = 150
+        y_width = 50
+
+        if x_pos+x_length > mouse[0] > x_pos and y_pos+y_width > mouse[1] > y_width: # Hovering over box
+            pygame.draw.rect(pygame.display.get_surface(),self.brightred,(x_pos,y_pos,x_length,y_width))
+            if click[0] == 1:
+                print('Robot has stopped moving')
+                # Inserting function that pubslishes command to motors to stop using rospy.Publisher
+        else:
+            pygame.draw.rect(pygame.display.get_surface(),self.red,(x_pos,y_pos,x_length,y_width))
+
+        textSurf,textRect = self.text_object_black("STOP", self.smalltext) # Insert text on box
+        textRect.center = ( (x_pos +(x_length/2)), y_pos+(y_width/2))
+        pygame.display.get_surface().blit(textSurf, textRect)
 
     def plot(self):
         pygame.init() # Initializing pygame
@@ -59,47 +145,31 @@ class RadarDisplay():
         done = False
 
         # Initialize variables
-        StepCounter = 0
-        Rrx = [0] *512 # Creates an array of 512 zeros
+        Rrx = [0] *512 # Creates an array of 512 zeros. 512 is number of points
         Rry = [0] *512 # Creates an array of 512 zeros
-        pos = 2
-        circ_rad = 4
 
         while (True):
-          # For loop always starts with zero. in this case we have 0, 1 ,2 ...., 2047
-          # If we had for i in range(1,2018), we get 1 ,2,  3, .., 2047
           for i in range(2048): # 4096 covers entire circle and is how many times radius line is drawn
-        # motor angle (From Arduino)
             #angle = i * 5.625/64 #Part of original code. It increments by 5 degrees (0.087890625)
-            self.angle = i * 6.283/72 #  Line is incremented by 5 degrees (6.283 is 2 pi)
-              #angle = 15 # My code
-            #
-            # StepCounter += StepDir
-            #
-            # if (StepCounter>=StepCount):
-            #         StepCounter = 0
-            # if (StepCounter<0):
-            #         StepCounter = StepCount+StepDir
+            self.angle = i * (2 * math.pi)/72 #  Line is incremented by 5 degrees (6.283 is 2 pi)
 
-            if i%8==0: # Drawing radar arcs and axis. sx and sy originally divided by 2. 8 is the 8 figures drawn
-                # Color green: (0,255,0). Color blue: (0,0,255)
-
+            if i%8==0:
                # Radius is 1000*(4/5) = 800 cm [400 cm]
-               pygame.draw.circle(screen, (0, 200, 0), (sx/pos, sy/pos), 400, 1) # Outer circle
+               pygame.draw.circle(screen, self.green, (sx/self.pos, sy/self.pos), 400, 1) # Outer circle
                #Radius is 1000/5 = 200 cm [100 cm] [100 cm translates to distance of 2
-               pygame.draw.circle(screen, (0, 200,0), (sx/pos, sy/pos), 100, 1) #Inner circle. radius was sx/pos/5*1
+               pygame.draw.circle(screen, self.green, (sx/self.pos, sy/self.pos), 100, 1) #Inner circle. radius was sx/pos/5*1
                # Radius is 1000*(2/5) = 400 cm [200 cm] [200 transaltes to distance of 3]
-               pygame.draw.circle(screen, (0, 200, 0), (sx/pos, sy/pos), 200, 1) # 2nd Inner circle. radius was sx/pos/5*2
+               pygame.draw.circle(screen, self.green, (sx/self.pos, sy/self.pos), 200, 1) # 2nd Inner circle. radius was sx/pos/5*2
                # Radius is 1000*(3/5) = 600 cm [300 cm]
-               pygame.draw.circle(screen, (0, 200, 0), (sx/pos, sy/pos), 300, 1) # 3rd Inner Circle. radius was sx/pos/5*3
-               pygame.draw.line(screen, (0, 200, 0), (100, sy/pos), (900, sy/pos)) # Horizontal Line. Origianlly from (0, sy/pos) to (sx,sy/pos)
-               pygame.draw.line(screen, (0, 200, 0), (sx/pos, 100), (sx/pos, 900)) # Vertical Line
+               pygame.draw.circle(screen, self.green, (sx/self.pos, sy/self.pos), 300, 1) # 3rd Inner Circle. radius was sx/pos/5*3
+               pygame.draw.line(screen, self.green, (100, sy/self.pos), (900, sy/self.pos)) # Horizontal Line. Origianlly from (0, sy/pos) to (sx,sy/pos)
+               pygame.draw.line(screen, self.green, (sx/self.pos, 100), (sx/self.pos, 900)) # Vertical Line
 
-               text_col = pygame.font.SysFont('Arial',25)
-               text_col.render('|_| Circle Increment of 20 cm',True,(0, 200, 0))
+               self.stop_button()
+               self.detect_text()
+               self.arc_inc()
 
                for j in range(512): # 512 is the number of points drawn for entire circle.
-        #           col = 255 # 255 is brightest and 0 is darkest
                    deg = j * 5.625 / 8 # Increments by 40 degrees
                    radar_deg = deg - self.angle # For first iteration we have 40 - 5 = 35 degrees
                    if radar_deg <=0 :
