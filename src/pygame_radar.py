@@ -6,7 +6,7 @@
 # https://www.youtube.com/redirect?q=http%3A%2F%2Farkouji.cocolog-nifty.com%2Fblog%2F2016%2F02%2Fraspberry-pi360.html&event=video_description&v=Hqkki-Jl4Y0&redir_token=Mpq6_On6NVQa4GJB1g0-_uQ2zn98MTUxNTYzNDM4MUAxNTE1NTQ3OTgx
 
 # Modified By: Jeovanny Reyes
-# Modified On: February 6, 2018
+# Modified On: February 10, 2018
 
 # Subscriber: "HerculesUltrasound_Range" message topic of float 32 data type
 # Pubslisher: "" Hercules motor control to stop robot from moving
@@ -50,11 +50,11 @@ class RadarDisplay():
         obj_dist = range.range
         self.dist = obj_dist
 
-    def text_object_black(self,text, font):
+    def text_object_black(self,text, font): # For black text
         self.textSurface = font.render(text, True, self.black)
         return self.textSurface, self.textSurface.get_rect()
 
-    def text_object_green(self,text, font):
+    def text_object_green(self,text, font): # For green text
         self.textSurface = font.render(text, True, self.green)
         return self.textSurface, self.textSurface.get_rect()
 
@@ -95,9 +95,9 @@ class RadarDisplay():
 
         textSurf8, textRect8 = self.text_object_green("100 cm", self.smalltext)
         textRect8.center = ( (x_pos +(x_length/2) + 500), y_pos+(y_width/2))
-        pygame.display.get_surface().blit(textSurf8, textRect8)
+        pygame.display.get_surface().blit(textSurf8, textRect8) # cm and deg markers
 
-    def detect_text(self):
+    def detect_text(self): # "Object Distance" label
         x_pos = 625
         y_pos = 5
         x_length = 150
@@ -106,6 +106,106 @@ class RadarDisplay():
         textSurfstop, textRectstop = self.text_object_green("Object Distance:", self.smalltext)
         textRectstop.center = ( (x_pos +(x_length/2)), y_pos+(y_width/2))
         pygame.display.get_surface().blit(textSurfstop, textRectstop)
+
+    def range_to_string(self): # Label for displaying range value
+        x_pos = 800
+        y_pos = 5
+        x_length = 150
+        y_width = 100
+        str_dist = str(self.dist) # converting range integer to string
+        self.smalltext = pygame.font.Font("freesansbold.ttf",30)
+        textSurfstop, textRectstop = self.text_object_green(str_dist + "cm", self.smalltext)
+        textRectstop.center = ( (x_pos +(x_length/2)), y_pos+(y_width/2))
+        pygame.display.get_surface().blit(textSurfstop, textRectstop)
+
+    def linesections(self):
+        center_of_circle = (500,500)
+        left_edge = (100,500)
+        cent_to_lefedge = (center_of_circle[0]-left_edge[0],center_of_circle[1]-left_edge[1])
+        self.smalltext = pygame.font.Font("freesansbold.ttf",15)
+        newpoint_x = [0] * 17
+        newpoint_y = [0] * 17
+        newpoint = [0] * 17
+        n = range(20,360,20) # Creates 17 integers
+
+        for i in range(17):
+                newpoint_x[i] = ( math.cos(math.radians(n[i])) * cent_to_lefedge[0] ) + ( math.sin(math.radians(n[i])) * cent_to_lefedge[1] )
+                newpoint_y[i] = ( -1 *math.sin(math.radians(n[i])) * cent_to_lefedge[0] ) + ( math.cos(math.radians(n[i])) * cent_to_lefedge[1] )
+
+        newpoint1 = (center_of_circle[0] - newpoint_x[0], newpoint_y[0] + center_of_circle[1])
+        newpoint2 = (center_of_circle[0] - newpoint_x[1], newpoint_y[1] + center_of_circle[1])
+        newpoint3 = (center_of_circle[0] - newpoint_x[2], newpoint_y[2] + center_of_circle[1])
+        newpoint4 = (center_of_circle[0] - newpoint_x[3], newpoint_y[3] + center_of_circle[1])
+        newpoint5 = (center_of_circle[0] - newpoint_x[4], newpoint_y[4] + center_of_circle[1])
+        newpoint6 = (center_of_circle[0] - newpoint_x[5], newpoint_y[5] + center_of_circle[1])
+        newpoint7 = (center_of_circle[0] - newpoint_x[6], newpoint_y[6] + center_of_circle[1])
+        newpoint8 = (center_of_circle[0] - newpoint_x[7], newpoint_y[7] + center_of_circle[1])
+        newpoint9 = (center_of_circle[0] - newpoint_x[8], newpoint_y[8] + center_of_circle[1])
+        newpoint10 = (center_of_circle[0] - newpoint_x[9], newpoint_y[9] + center_of_circle[1])
+        newpoint11 = (center_of_circle[0] - newpoint_x[10], newpoint_y[10] + center_of_circle[1])
+        newpoint12 = (center_of_circle[0] - newpoint_x[11], newpoint_y[11] + center_of_circle[1])
+        newpoint13 = (center_of_circle[0] - newpoint_x[12], newpoint_y[12] + center_of_circle[1])
+        newpoint14 = (center_of_circle[0] - newpoint_x[13], newpoint_y[13] + center_of_circle[1])
+        newpoint15 = (center_of_circle[0] - newpoint_x[14], newpoint_y[14] + center_of_circle[1])
+        newpoint16 = (center_of_circle[0] - newpoint_x[15], newpoint_y[15] + center_of_circle[1])
+        newpoint17 = (center_of_circle[0] - newpoint_x[16], newpoint_y[16] + center_of_circle[1])
+
+        textSurf1, textRect1 = self.text_object_green("20 deg", self.smalltext)
+        textRect1.center = ( newpoint1[0] - 25, newpoint1[1])
+        pygame.display.get_surface().blit(textSurf1, textRect1)
+
+
+        textSurf2, textRect2 = self.text_object_green("40 deg", self.smalltext)
+        textRect2.center = ( newpoint2[0] - 30, newpoint2[1])
+        pygame.display.get_surface().blit(textSurf2, textRect2)
+
+        textSurf3, textRect3 = self.text_object_green("60 deg", self.smalltext)
+        textRect3.center = ( newpoint3[0] - 25, newpoint3[1] - 5)
+        pygame.display.get_surface().blit(textSurf3, textRect3)
+
+        textSurf4, textRect4 = self.text_object_green("80 deg", self.smalltext)
+        textRect4.center = ( newpoint4[0] - 25, newpoint4[1] - 10)
+        pygame.display.get_surface().blit(textSurf4, textRect4)
+
+        textSurf5, textRect5 = self.text_object_green("100 deg", self.smalltext)
+        textRect5.center = ( newpoint5[0] + 25, newpoint5[1] - 10)
+        pygame.display.get_surface().blit(textSurf5, textRect5)
+
+        textSurf6, textRect6 = self.text_object_green("120 deg", self.smalltext)
+        textRect6.center = ( newpoint6[0] + 25, newpoint6[1] - 5)
+        pygame.display.get_surface().blit(textSurf6, textRect6)
+
+        textSurf7, textRect7 = self.text_object_green("140 deg", self.smalltext)
+        textRect7.center = ( newpoint7[0] + 30, newpoint7[1] - 10)
+        pygame.display.get_surface().blit(textSurf7, textRect7)
+
+        textSurf8, textRect8 = self.text_object_green("160 deg", self.smalltext)
+        textRect8.center = ( newpoint8[0] + 25, newpoint8[1] )
+        pygame.display.get_surface().blit(textSurf8, textRect8)
+
+        textSurf9, textRect9 = self.text_object_green("90 deg", self.smalltext)
+        textRect9.center = ( 500,85)
+        pygame.display.get_surface().blit(textSurf9, textRect9)
+
+        screen = pygame.display.get_surface()
+
+        pygame.draw.aaline(screen, self.green, center_of_circle, newpoint1,5) # Left Hand Side
+        pygame.draw.aaline(screen, self.green, center_of_circle, newpoint2,5)
+        pygame.draw.aaline(screen, self.green, center_of_circle, newpoint3,5)
+        pygame.draw.aaline(screen, self.green, center_of_circle, newpoint4,5)
+        pygame.draw.aaline(screen, self.green, center_of_circle, newpoint5,5) # Right Hand Side
+        pygame.draw.aaline(screen, self.green, center_of_circle, newpoint6,5)
+        pygame.draw.aaline(screen, self.green, center_of_circle, newpoint7,5)
+        pygame.draw.aaline(screen, self.green, center_of_circle, newpoint8,5)
+        pygame.draw.aaline(screen, self.green, center_of_circle, newpoint9,5) # Bottom Right Side
+        pygame.draw.aaline(screen, self.green, center_of_circle, newpoint10,5)
+        pygame.draw.aaline(screen, self.green, center_of_circle, newpoint11,5)
+        pygame.draw.aaline(screen, self.green, center_of_circle, newpoint12,5) # Bottom Left Side
+        pygame.draw.aaline(screen, self.green, center_of_circle, newpoint13,5)
+        pygame.draw.aaline(screen, self.green, center_of_circle, newpoint14,5)
+        pygame.draw.aaline(screen, self.green, center_of_circle, newpoint15,5)
+        pygame.draw.aaline(screen, self.green, center_of_circle, newpoint16,5)
+        pygame.draw.aaline(screen, self.green, center_of_circle, newpoint17,5) # Creates 9 sectors above x axis
 
     def stop_button(self): # Function to stop robot from moving
         mouse = pygame.mouse.get_pos() # Movement of mouse.
@@ -150,7 +250,6 @@ class RadarDisplay():
 
         while (True):
           for i in range(2048): # 4096 covers entire circle and is how many times radius line is drawn
-            #angle = i * 5.625/64 #Part of original code. It increments by 5 degrees (0.087890625)
             self.angle = i * (2 * math.pi)/72 #  Line is incremented by 5 degrees (6.283 is 2 pi)
 
             if i%8==0:
@@ -163,11 +262,14 @@ class RadarDisplay():
                # Radius is 1000*(3/5) = 600 cm [300 cm]
                pygame.draw.circle(screen, self.green, (sx/self.pos, sy/self.pos), 300, 1) # 3rd Inner Circle. radius was sx/pos/5*3
                pygame.draw.line(screen, self.green, (100, sy/self.pos), (900, sy/self.pos)) # Horizontal Line. Origianlly from (0, sy/pos) to (sx,sy/pos)
-               pygame.draw.line(screen, self.green, (sx/self.pos, 100), (sx/self.pos, 900)) # Vertical Line
+               #pygame.draw.line(screen, self.brightred, (sx/self.pos, 100), (sx/self.pos, 900)) # Vertical Line
+               pygame.draw.line(screen, self.brightred, (sx/self.pos, 100), (sx/self.pos, 500)) # Vertical Line
 
                self.stop_button()
                self.detect_text()
                self.arc_inc()
+               self.range_to_string()
+               self.linesections()
 
                for j in range(512): # 512 is the number of points drawn for entire circle.
                    deg = j * 5.625 / 8 # Increments by 40 degrees
@@ -182,13 +284,13 @@ class RadarDisplay():
                if self.dist < 0:
                    self.dist = math.fabs(self.dist) # Returns the absolute value of distance
 
-               dx = sx/2 + sx/2 * math.cos(math.radians(self.angle))
-               dy = sy/2 + sx/2 * math.sin(math.radians(self.angle))
+               dx = sx/2 - sx/2 * math.cos(math.radians(self.angle)) # Starts from lest side
+               dy = sy/2 - sx/2 * math.sin(math.radians(self.angle)) # Starts from top side
                # anti aliasing line: To make line smooth
-               pygame.draw.aaline(screen, (0, 200, 0), (sx/2, sy/2), (dx, dy),5)
+               pygame.draw.aaline(screen, (0, 200, 0), (sx/2, sy/2), (dx, dy),5) # Takes about 10 seconds to sweep 180 degrees
 
-               rx = int(sx/2 + 50 * self.dist * math.cos(math.radians(self.angle)))
-               ry = int(sy/2 + 50 * self.dist * math.sin(math.radians(self.angle)))
+               rx = int(sx/2 - 50 * self.dist * math.cos(math.radians(self.angle)))
+               ry = int(sy/2 - 50 * self.dist * math.sin(math.radians(self.angle)))
 
                Rrx[i/8] = rx
                Rry[i/8] = ry
@@ -201,7 +303,7 @@ class RadarDisplay():
                for event in pygame.event.get():
                    if event.type == pygame.QUIT:
                        pygame.quit()
-                       exit()
+                       exit() # Plots data
 
 
 if __name__ == '__main__':
