@@ -121,5 +121,5 @@ float calculateDistance(){
   
   duration = pulseIn(echoPin, HIGH); // Reads the echoPin, returns the sound wave travel time in microseconds
   distance= duration*0.034/2;
-  return distance / 100; // in meters. Try 1000 next time
+  return distance; // 100; // in meters. Try 1000 next time
 }

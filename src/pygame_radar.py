@@ -30,13 +30,15 @@ class RadarDisplay():
         rospy.loginfo("%s started" % self.nodename)
 
         # Initializing and instantiating values
-        self.dist = 0
+        self.real_obj_dist = 0
+        self.estimated_obj_dist = 0
         self.angle = 0
         self.pos = 2
         self.green = (0,200,0) # color
         self.red = (200,0,0) # color
         self.black = (0,0,0) # color
         self.brightred = (255,0,0)
+        self.brightblue = (142,229,238)
         self.brightgreen = (0,255,0)
         self.smalltext = 0
 
@@ -46,9 +48,12 @@ class RadarDisplay():
 
         rospy.spin()
 
-    def distcallback(self,range): # Takes in message "range" as input
-        obj_dist = range.range
-        self.dist = obj_dist
+    def distcallback(self,range): # Takes in message "range" as input. Data comes back in cm
+        #obj_dist = range.range
+        real_obj_dist = range.range
+        estimated_obj_dist = (real_obj_dist/25)*2
+        self.real_obj_dist = real_obj_dist
+        self.estimated_obj_dist = estimated_obj_dist
 
     def text_object_black(self,text, font): # For black text
         self.textSurface = font.render(text, True, self.black)
@@ -56,6 +61,10 @@ class RadarDisplay():
 
     def text_object_green(self,text, font): # For green text
         self.textSurface = font.render(text, True, self.green)
+        return self.textSurface, self.textSurface.get_rect()
+
+    def text_object_red(self,text, font):
+        self.textSurface = font.render(text, True, self.red)
         return self.textSurface, self.textSurface.get_rect()
 
     def arc_inc(self):
@@ -95,9 +104,9 @@ class RadarDisplay():
 
         textSurf8, textRect8 = self.text_object_green("100 cm", self.smalltext)
         textRect8.center = ( (x_pos +(x_length/2) + 500), y_pos+(y_width/2))
-        pygame.display.get_surface().blit(textSurf8, textRect8) # cm and deg markers
+        pygame.display.get_surface().blit(textSurf8, textRect8) # cm and deg markers # cm markers ,e.g. 20 cm
 
-    def detect_text(self): # "Object Distance" label
+    def detect_text(self): # "Object Distance","Object Detected" and "Object Out of Range" label
         x_pos = 625
         y_pos = 5
         x_length = 150
@@ -107,18 +116,27 @@ class RadarDisplay():
         textRectstop.center = ( (x_pos +(x_length/2)), y_pos+(y_width/2))
         pygame.display.get_surface().blit(textSurfstop, textRectstop)
 
+        if self.real_obj_dist < 100:
+            textSurfstop1, textRectstop1 = self.text_object_green("Object Detected", self.smalltext)
+            textRectstop1.center = ( (x_pos +(x_length/2) - 300), y_pos+(y_width/2))
+            pygame.display.get_surface().blit(textSurfstop1, textRectstop1)
+        else:
+            textSurfstop1, textRectstop1 = self.text_object_red("Object Out of Range", self.smalltext)
+            textRectstop1.center = ( (x_pos +(x_length/2) - 300), y_pos+(y_width/2))
+            pygame.display.get_surface().blit(textSurfstop1, textRectstop1)
+
     def range_to_string(self): # Label for displaying range value
         x_pos = 800
         y_pos = 5
         x_length = 150
         y_width = 100
-        str_dist = str(self.dist) # converting range integer to string
+        str_dist = str(self.real_obj_dist) # converting range integer to string
         self.smalltext = pygame.font.Font("freesansbold.ttf",30)
         textSurfstop, textRectstop = self.text_object_green(str_dist + "cm", self.smalltext)
         textRectstop.center = ( (x_pos +(x_length/2)), y_pos+(y_width/2))
         pygame.display.get_surface().blit(textSurfstop, textRectstop)
 
-    def linesections(self):
+    def linesections(self): # Creating nine sections and degree markers
         center_of_circle = (500,500)
         left_edge = (100,500)
         cent_to_lefedge = (center_of_circle[0]-left_edge[0],center_of_circle[1]-left_edge[1])
@@ -126,7 +144,7 @@ class RadarDisplay():
         newpoint_x = [0] * 17
         newpoint_y = [0] * 17
         newpoint = [0] * 17
-        n = range(20,360,20) # Creates 17 integers
+        n = range(20,360,20) # Creates 17 integers. Used for degree markers
 
         for i in range(17):
                 newpoint_x[i] = ( math.cos(math.radians(n[i])) * cent_to_lefedge[0] ) + ( math.sin(math.radians(n[i])) * cent_to_lefedge[1] )
@@ -263,7 +281,7 @@ class RadarDisplay():
                pygame.draw.circle(screen, self.green, (sx/self.pos, sy/self.pos), 300, 1) # 3rd Inner Circle. radius was sx/pos/5*3
                pygame.draw.line(screen, self.green, (100, sy/self.pos), (900, sy/self.pos)) # Horizontal Line. Origianlly from (0, sy/pos) to (sx,sy/pos)
                #pygame.draw.line(screen, self.brightred, (sx/self.pos, 100), (sx/self.pos, 900)) # Vertical Line
-               pygame.draw.line(screen, self.brightred, (sx/self.pos, 100), (sx/self.pos, 500)) # Vertical Line
+               pygame.draw.line(screen, self.brightblue, (sx/self.pos, 100), (sx/self.pos, 500)) # Vertical Line
 
                self.stop_button()
                self.detect_text()
@@ -281,16 +299,18 @@ class RadarDisplay():
                       col = int(255*(radar_deg/360)**1.3)
                       pygame.draw.circle(screen, (0,col,0),(Rrx[j-1],Rry[j-1]),5)
 
-               if self.dist < 0:
-                   self.dist = math.fabs(self.dist) # Returns the absolute value of distance
+               if self.estimated_obj_dist < 0:
+                   self.estimated_obj_dist = math.fabs(self.estimated_obj_dist) # Returns the absolute value of distance
+               elif self.estimated_obj_dist > 8: # If object is greater than 1oo cm. It gets plotted at origin
+                   self.estimated_obj_dist = 0
 
                dx = sx/2 - sx/2 * math.cos(math.radians(self.angle)) # Starts from lest side
                dy = sy/2 - sx/2 * math.sin(math.radians(self.angle)) # Starts from top side
                # anti aliasing line: To make line smooth
-               pygame.draw.aaline(screen, (0, 200, 0), (sx/2, sy/2), (dx, dy),5) # Takes about 10 seconds to sweep 180 degrees
+               pygame.draw.aaline(screen, self.brightred, (sx/2, sy/2), (dx, dy),5) # Takes about 10 seconds to sweep 180 degrees
 
-               rx = int(sx/2 - 50 * self.dist * math.cos(math.radians(self.angle)))
-               ry = int(sy/2 - 50 * self.dist * math.sin(math.radians(self.angle)))
+               rx = int(sx/2 - 50 * self.estimated_obj_dist * math.cos(math.radians(self.angle)))
+               ry = int(sy/2 - 50 * self.estimated_obj_dist * math.sin(math.radians(self.angle)))
 
                Rrx[i/8] = rx
                Rry[i/8] = ry
@@ -303,7 +323,7 @@ class RadarDisplay():
                for event in pygame.event.get():
                    if event.type == pygame.QUIT:
                        pygame.quit()
-                       exit() # Plots data
+                       exit()
 
 
 if __name__ == '__main__':
