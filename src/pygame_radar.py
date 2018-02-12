@@ -22,6 +22,7 @@ import numpy as np
 
 import rospy
 from sensor_msgs.msg import Range
+from std_msgs.msg import Float32
 
 class RadarDisplay():
     def __init__(self):
@@ -32,6 +33,7 @@ class RadarDisplay():
         # Initializing and instantiating values
         self.real_obj_dist = 0
         self.estimated_obj_dist = 0
+        self.servo_pos = 0
         self.angle = 0
         self.pos = 2
         self.green = (0,200,0) # color
@@ -42,18 +44,23 @@ class RadarDisplay():
         self.brightgreen = (0,255,0)
         self.smalltext = 0
 
-        # Subscriber
-        self.radsip = rospy.Subscriber("HerculesUltrasound_Range",Range, self.distcallback) #Used to be Float32. [Float 32, callback]
+        # Subscribers
+        self.sensormsgs = rospy.Subscriber("HerculesUltrasound_Range",Range, self.distcallback) #Used to be Float32. [Float 32, callback]
+        self.servopos = rospy.Subscriber("HerculesUltrasound_Position",Float32, self.poscallback)
         self.plot()
 
         rospy.spin()
 
     def distcallback(self,range): # Takes in message "range" as input. Data comes back in cm
-        #obj_dist = range.range
         real_obj_dist = range.range
         estimated_obj_dist = (real_obj_dist/25)*2
         self.real_obj_dist = real_obj_dist
         self.estimated_obj_dist = estimated_obj_dist
+
+    def poscallback(self,data):
+        servo_position = data.data # 461 (or 457) is 180 degrees while 89 or 90 is 0 degrees
+        servo_position = (servo_position - 90) * (180/370)
+        self.servo_pos = servo_position
 
     def text_object_black(self,text, font): # For black text
         self.textSurface = font.render(text, True, self.black)
@@ -106,7 +113,7 @@ class RadarDisplay():
         textRect8.center = ( (x_pos +(x_length/2) + 500), y_pos+(y_width/2))
         pygame.display.get_surface().blit(textSurf8, textRect8) # cm and deg markers # cm markers ,e.g. 20 cm
 
-    def detect_text(self): # "Object Distance","Object Detected" and "Object Out of Range" label
+    def labels(self): # "Object Distance","Object Detected" and "Object Out of Range" label
         x_pos = 625
         y_pos = 5
         x_length = 150
@@ -125,16 +132,25 @@ class RadarDisplay():
             textRectstop1.center = ( (x_pos +(x_length/2) - 300), y_pos+(y_width/2))
             pygame.display.get_surface().blit(textSurfstop1, textRectstop1)
 
+        textSurfstop2, textRectstop2 = self.text_object_green("Servo Angle: ", self.smalltext)
+        textRectstop2.center = ( (x_pos +(x_length/2) - 550), y_pos+(y_width/2) + 850)
+        pygame.display.get_surface().blit(textSurfstop2, textRectstop2)
+
     def range_to_string(self): # Label for displaying range value
         x_pos = 800
         y_pos = 5
         x_length = 150
         y_width = 100
         str_dist = str(self.real_obj_dist) # converting range integer to string
+        str_pos = str(self.servo_pos) # Converting angle to string
         self.smalltext = pygame.font.Font("freesansbold.ttf",30)
         textSurfstop, textRectstop = self.text_object_green(str_dist + "cm", self.smalltext)
         textRectstop.center = ( (x_pos +(x_length/2)), y_pos+(y_width/2))
         pygame.display.get_surface().blit(textSurfstop, textRectstop)
+
+        textSurfstop1, textRectstop1 = self.text_object_green(str_pos + "degrees", self.smalltext)
+        textRectstop1.center = ( (x_pos +(x_length/2) - 540), y_pos+(y_width/2) + 850)
+        pygame.display.get_surface().blit(textSurfstop1, textRectstop1)
 
     def linesections(self): # Creating nine sections and degree markers
         center_of_circle = (500,500)
@@ -248,6 +264,7 @@ class RadarDisplay():
 
     def plot(self):
         pygame.init() # Initializing pygame
+        pygame.time.delay(1000) # Waits 2 seconds to get in synch with servo
 
         # Adjusting window
         sx = 1000 # Width
@@ -284,10 +301,11 @@ class RadarDisplay():
                pygame.draw.line(screen, self.brightblue, (sx/self.pos, 100), (sx/self.pos, 500)) # Vertical Line
 
                self.stop_button()
-               self.detect_text()
+               self.labels()
                self.arc_inc()
                self.range_to_string()
                self.linesections()
+               #pygame.time.delay(2000) # Waits 2 seconds to get in synch with servo
 
                for j in range(512): # 512 is the number of points drawn for entire circle.
                    deg = j * 5.625 / 8 # Increments by 40 degrees
@@ -299,9 +317,17 @@ class RadarDisplay():
                       col = int(255*(radar_deg/360)**1.3)
                       pygame.draw.circle(screen, (0,col,0),(Rrx[j-1],Rry[j-1]),5)
 
-               if self.estimated_obj_dist < 0:
+               if self.estimated_obj_dist < 0: # If object distance is smaller than 100 cm
                    self.estimated_obj_dist = math.fabs(self.estimated_obj_dist) # Returns the absolute value of distance
-               elif self.estimated_obj_dist > 8: # If object is greater than 1oo cm. It gets plotted at origin
+                   x_pos = 500
+                   y_pos = 500
+                   x_length = 150
+                   y_width = 100
+                   self.smalltext = pygame.font.Font("freesansbold.ttf",30)
+                   textSurfstop, textRectstop = self.text_object_green("X", self.smalltext)
+                   textRectstop.center = ( (x_pos +(x_length/2)), y_pos+(y_width/2))
+                   pygame.display.get_surface().blit(textSurfstop, textRectstop)
+               elif self.estimated_obj_dist > 8: # If object distance is greater than 1oo cm. It gets plotted at origin
                    self.estimated_obj_dist = 0
 
                dx = sx/2 - sx/2 * math.cos(math.radians(self.angle)) # Starts from lest side
