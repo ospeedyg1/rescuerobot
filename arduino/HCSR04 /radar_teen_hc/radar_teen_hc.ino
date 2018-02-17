@@ -38,8 +38,8 @@ ros::Publisher pub_range( "/HerculesUltrasound_Range", &range_msg);
 ros::Publisher servopos("/HerculesUltrasound_Position", &str_msg); 
  
 // Defines Trig and Echo pins of the Ultrasonic Sensor
-const int trigPin = 30; //digital pin
-const int echoPin = 29; // digital pin
+const int trigPin = 4; //digital pin
+const int echoPin = 3; // digital pin
 int servofeed = A14; // analog pin
 int servo_pos = 0; // position placeholder for servo
 
@@ -64,7 +64,7 @@ void setup() {
   pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
   pinMode(echoPin, INPUT); // Sets the echoPin as an Input
   //Serial.begin(9600);
-  myServo.attach(35); // Defines on which pin is the servo motor attached
+  myServo.attach(5); // Defines on which pin is the servo motor attached
 }
 
 void loop() {
@@ -120,5 +120,5 @@ float calculateDistance(){
   
   duration = pulseIn(echoPin, HIGH); // Reads the echoPin, returns the sound wave travel time in microseconds
   distance= duration*0.034/2;
-  return distance / 100; // in meters
+  return distance; // 100; // in meters
 }
