@@ -1,6 +1,6 @@
 /* 
  *  
- *  Amr - Code for the Heculues Motor Controller
+ *  Amr Wanly - Code for the Heculues Motor Controller
  *  
  *  
  *  Credit: the Herculues Motor Driver Library was obtained from  https://github.com/Seeed-Studio/Hercules_Motor_Driver
