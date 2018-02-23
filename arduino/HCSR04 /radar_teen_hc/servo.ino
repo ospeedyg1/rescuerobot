@@ -25,7 +25,6 @@
 
 #include <ros.h>
 #include <ros/time.h>
-#include <sensor_msgs/Range.h>
 #include <std_msgs/Float32.h>
 
 #include <Servo.h> 
