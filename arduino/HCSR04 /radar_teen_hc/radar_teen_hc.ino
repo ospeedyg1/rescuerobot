@@ -15,7 +15,7 @@
 * How to Run from Terminal: Run "roscore" 
 *                           On a sperate terminal run "rosrun rosserial_python serial_node.py _port:=/dev/ttyACM0 _baud:=57600
 *                           Note: _port may be different for other and baud rate parameter can be changed
-*/
+
 
 //#if (ARDUINO >= 100)
 // #include <Arduino.h>
@@ -122,3 +122,4 @@ float calculateDistance(){
   distance= duration*0.034/2;
   return distance; // 100; // in meters
 }
+*/
