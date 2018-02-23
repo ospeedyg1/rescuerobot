@@ -78,6 +78,7 @@ void loop() {
   range_msg.header.stamp = nh.now();
   pub_range.publish( &range_msg);
   
+  nh.spinOnce();
 
     //delay(1);
 }
