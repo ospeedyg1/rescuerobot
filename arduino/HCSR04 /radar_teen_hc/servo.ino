@@ -37,7 +37,7 @@ ros::Publisher servopos("/HerculesUltrasound_Position", &str_msg);
 
 int servofeed = A14; // analog pin
 int servo_pos = 0; // position placeholder for servo
-
+int temp = 0; //variable that will store the analog feedback signal
 
 Servo myServo; // Creates a servo object for controlling the servo motor
 
@@ -58,7 +58,9 @@ void loop() {
   for(int i=15;i<=165;i++){   
   myServo.write(i);
   
-  servo_pos = analogRead(servofeed);
+  temp = analogRead(servofeed);
+
+  servo_pos = ((0.3956*temp)-75.165);
 
   
   str_msg.data = servo_pos; // Servo position publishing
@@ -72,8 +74,11 @@ void loop() {
   for(int i=165;i>15;i--){  
   myServo.write(i);
   
-  servo_pos = analogRead(servofeed);
+ temp = analogRead(servofeed);
 
+  servo_pos = ((0.3956*temp)-75.165);
+
+  
   str_msg.data = servo_pos; // Servo position publishing
   servopos.publish( &str_msg);
   
@@ -85,4 +90,5 @@ void loop() {
   //delay(1);
 
 }
+
 

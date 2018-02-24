@@ -59,7 +59,7 @@ class RadarDisplay():
 
     def poscallback(self,data):
         servo_position = data.data # 645 (or 646) is 180 degrees while 191 is 0 degrees
-       # servo_position = (servo_position - 190) * (180/455)
+        servo_position = (servo_position - 190) * (180/455)
         self.servo_pos = servo_position
 
     def text_object_black(self,text, font): # For black text
